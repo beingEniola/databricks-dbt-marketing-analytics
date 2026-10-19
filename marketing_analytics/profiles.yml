@@ -1,0 +1,49 @@
+marketing_analytics:
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+  
+  meta:
+    base: &base
+      type: databricks
+      threads: 8
+    base_auth: &base_auth
+      type: databricks
+      auth_type: oauth
+      client_id: "{{ env_var('DBX_ID_APPLICATION_ID') }}"
+      client_secret: "{{ env_var('DBX_SECRET') }}"
+      threads: 8
+      connect_retries: 3
+      retry_all: true
+
+  outputs:
+    dev: &dev_service_account
+      <<: *base
+      host: dbc-1af15f16-cf54.cloud.databricks.com
+      token: "{{ env_var('DATABRICKS_PAT_TOKEN') }}"
+      catalog: "{{ env_var('DEV_CATALOG') }}"
+      schema: "{{ env_var('DEV_SCHEMA') }}"
+      http_path: "{{ env_var('HTTP_PATH') }}"
+
+    ci: &ci_service_account
+      <<: *base_auth
+      catalog: "{{ env_var('CI_CATALOG') }}"
+      schema: "{{ env_var('CI_SCHEMA') }}"
+      host: dbc-1af15f16-cf54.cloud.databricks.com
+      http_path: "{{ env_var('HTTP_PATH') }}"
+
+    production: &production_service_account
+      <<: *base_auth
+      catalog: "{{ env_var('PROD_CATALOG') }}"
+      schema: "{{ env_var('PROD_SCHEMA') }}"
+      host: dbc-1af15f16-cf54.cloud.databricks.com
+      http_path: "{{ env_var('HTTP_PATH') }}"
+
+      
+elementary:
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+  outputs:
+    dev:
+      <<: *dev_service_account
+    production:
+      <<: *production_service_account
+      catalog: 
+      schema: elementary
